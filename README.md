@@ -1,11 +1,12 @@
 ![](https://img.shields.io/badge/SDK-v12.10.0)
 
-# Chemistry App
-This sample app shows off basic chemical operations that are possible in VIKTOR 
+# AutoML app
+Sample app to show how easy it can be to distribute versatile machine learning solutions to people with no experience in it
 
-The app contains an input field for chemical elements, which it an then give the properties of.
-It contains another input table for reactants and products, which it will use to balance a reaction involving them.
-Lastly it has a field for SMILEs(string to represent a chemical), which it turns into 2D or 3D representations
+The app contains a toggle to distinguish between classification and regression machine learning. It has an input
+field for the name/path of your .csv so it can find it. It has a target where the column that needs to be learned
+an be distinguished. It has different analysis plots that can be visualized. Lastly it has a table input at the bottom
+where new data can be put in, after which the model can predict the new property for you.
 
 
-![](manifest/3D_molecule.png)
+![](manifest/labeled_data.png)
