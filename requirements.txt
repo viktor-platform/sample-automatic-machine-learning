@@ -1,0 +1,5 @@
+# viktor==12.10.0
+pandas
+pycaret
+scipy
+numba==0.53.0
