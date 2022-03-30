@@ -1,19 +1,38 @@
-from typing import Tuple
+"""Copyright (c) 2022 VIKTOR B.V.
 
-from pandas import DataFrame
-from viktor.core import ViktorController
-from viktor.views import  DataResult, DataView, DataGroup, DataItem, PlotlyView, PlotlyResult, PNGView, PNGResult
-from viktor.result import SetParamsResult
-from viktor.utils import memoize
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit
+persons to whom the Software is furnished to do so, subject to the following conditions:
 
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
+Software.
 
-from .parametrization import AIParametrization
+VIKTOR B.V. PROVIDES THIS SOFTWARE ON AN "AS IS" BASIS, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
 import pandas as pd
 import plotly.graph_objects as go
 import pycaret.classification
 import pycaret.regression
-from .helper_functions import get_model
+from pandas import DataFrame
+from viktor.core import ViktorController
+from viktor.result import SetParamsResult
+from viktor.utils import memoize
+from viktor.views import DataGroup
+from viktor.views import DataItem
+from viktor.views import DataResult
+from viktor.views import DataView
+from viktor.views import PNGResult
+from viktor.views import PNGView
+from viktor.views import PlotlyResult
+from viktor.views import PlotlyView
 
+from .helper_functions import get_model
+from .parametrization import AIParametrization
 
 
 class AIController(ViktorController):
@@ -23,34 +42,34 @@ class AIController(ViktorController):
     viktor_convert_entity_field = True
 
 
-    @PlotlyView('Data', duration_guess=1)
-    def data(self, params, entity_id, **kwargs):
-
-        csv = pd.read_csv(params.dataset.dataset)
-        cells = []
-        for col in csv.columns:
-            cells.append(csv[col])
+    @PlotlyView('Data', duration_guess=1) #view to visualize the data in the read dataset
+    def visualize_original(self, params, entity_id, **kwargs):
+        csv = pd.read_csv(params.dataset.data)
+        cells = [csv[col] for col in csv.columns]
+        # cells = []
+        # for col in csv.columns:
+        #     cells.append(csv[col])
 
         fig = go.Figure(data=go.Table(header=dict(values=list(csv.columns)), cells=dict(values=cells)))
 
         return PlotlyResult(fig.to_json())
 
 
-    @PlotlyView('Models', duration_guess = 4)
-    def calculate(self, params, entity_id, **kwargs):
-        best, comparison = get_model(params.dataset.dataset, params.dataset.target, params.choice.toggle)
+    @PlotlyView('Models', duration_guess = 4) #for visualizing the model scores
+    def calculate_models(self, params, entity_id, **kwargs):
+        comparison = get_model(params.dataset.data, params.dataset.target, params.choice.toggle)
         comparison = pd.DataFrame(comparison)
-        cells = []
-        for col in comparison.columns:
-            cells.append(comparison[col])
+        cells = [comparison[col] for col in comparison.columns]
+        # cells = []
+        # for col in comparison.columns:
+        #     cells.append(comparison[col])
 
         fig = go.Figure(data=go.Table(header=dict(values=list(comparison.columns)), cells=dict(values=cells)))
 
-
         return  PlotlyResult(fig.to_json())
 
-    @PNGView('Analysis plot', duration_guess=1)
-    def get_PNG(self, params, entity_id, **kwargs):
+    @PNGView('Analysis plot', duration_guess=1) #for visualizing some anamysis plots
+    def get_analyis_plot(self, params, entity_id, **kwargs):
         if params.choice.toggle == False:
             switcher = {'learning curve': 'Learning Curve.png',
                         'area under curve' : 'AUC.png',
@@ -72,31 +91,32 @@ class AIController(ViktorController):
 
         return PNGResult.from_path(plot_type)
 
-    @PlotlyView('Labeled data', duration_guess=4)
-    def labelling(self, params, entity_id, **kwargs):
-        csv = pd.read_csv(params.dataset.dataset)
+    @PlotlyView('Labeled data', duration_guess=4) #for analysing the values the machine learning gives the original data
+    def label_data(self, params, entity_id, **kwargs):
+        csv = pd.read_csv(params.dataset.data)
         if params.choice.toggle == False:
-            best = pycaret.classification.load_model('current model')
-            result = pycaret.classification.predict_model(best, data= csv)
+            best_model = pycaret.classification.load_model('current model')
+            result = pycaret.classification.predict_model(best_model, data=csv)
         else:
-            best = pycaret.regression.load_model('current model')
-            result = pycaret.regression.predict_model(best, data = csv)
+            best_model = pycaret.regression.load_model('current model')
+            result = pycaret.regression.predict_model(best_model, data=csv)
         result = pd.DataFrame(result)
-        cells = []
-        for col in result.columns:
-            cells.append(result[col])
+        cells = [csv[col] for col in csv.columns]
+        # cells = []
+        # for col in result.columns:
+        #     cells.append(result[col])
         fig = go.Figure(data=go.Table(header=dict(values=list(result.columns)), cells=dict(values=cells)))
 
         return PlotlyResult(fig.to_json())
 
-    @PlotlyView('New labels', duration_guess=4)
+    @PlotlyView('New labels', duration_guess=4) #for analysing the values the ML gives for new/custom data
     def label_new(self, params, entity_id, **kwargs):
-        csv = pd.read_csv(params.dataset.dataset)
+        csv = pd.read_csv(params.dataset.data)
         new_data = pd.DataFrame(params.new_data.inputs)
 
         new_data.replace('', float('NaN'), inplace=True)
-        new_data.dropna(how='all',axis=1, inplace=True)
-        csv = csv.drop([params.dataset.target], axis = 1)
+        new_data.dropna(how='all', axis=1, inplace=True)
+        csv = csv.drop([params.dataset.target], axis=1)
         new_data.columns = csv.columns
 
         for i in new_data.columns:
@@ -107,15 +127,16 @@ class AIController(ViktorController):
                     pass
 
         if params.choice.toggle == False:
-            best = pycaret.classification.load_model('current model')
-            result = pycaret.classification.predict_model(best, data=new_data)
+            best_model = pycaret.classification.load_model('current model')
+            result = pycaret.classification.predict_model(best_model, data=new_data)
         else:
-            best = pycaret.regression.load_model('current model')
-            result = pycaret.regression.predict_model(best, data=new_data)
+            best_model = pycaret.regression.load_model('current model')
+            result = pycaret.regression.predict_model(best_model, data=new_data)
         result = pd.DataFrame(result)
-        content_lis = []
-        for col in result.columns:
-            content_lis.append(result[col])
+        cells = [result[col] for col in result.columns]
+        # content_lis = []
+        # for col in result.columns:
+        #     content_lis.append(result[col])
 
         fig = go.Figure(data=go.Table(header=dict(values=list(result.columns)), cells=dict(values=content_lis)))
 

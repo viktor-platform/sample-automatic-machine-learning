@@ -1,18 +1,37 @@
+"""Copyright (c) 2022 VIKTOR B.V.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit
+persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
+Software.
+
+VIKTOR B.V. PROVIDES THIS SOFTWARE ON AN "AS IS" BASIS, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
+
+import pandas as pd
 import pycaret.classification
 import pycaret.regression
-import pandas as pd
-def get_model(csv_path, target, toggle):
+
+
+def get_model(csv_path, target, toggle): # Function to run the model comparison and make all corresponding plots
     csv = pd.read_csv(csv_path)
 
     if toggle == False:
         pycaret.classification.setup(csv, target=target, silent=True)
-        best = pycaret.classification.compare_models()
-        comparison = pycaret.classification.pull()
+        best_model = pycaret.classification.compare_models()
+        model_comparison = pycaret.classification.pull()
         pycaret.classification.save_model(best, 'current model')
     else:
         pycaret.regression.setup(csv, target=target, silent=True)
-        best = pycaret.regression.compare_models()
-        comparison = pycaret.regression.pull()
+        best_model = pycaret.regression.compare_models()
+        model_comparison = pycaret.regression.pull()
         pycaret.regression.save_model(best, 'current model')
     if toggle == False:
         pycaret.classification.plot_model(best, plot='learning', save=True)
@@ -34,4 +53,5 @@ def get_model(csv_path, target, toggle):
         pycaret.regression.plot_model(best, plot='feature', save=True)
         pycaret.regression.plot_model(best, plot='feature_all', save=True)
 
-    return best, comparison
+    return model_comparison
+
