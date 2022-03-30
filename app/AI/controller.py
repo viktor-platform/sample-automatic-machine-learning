@@ -18,14 +18,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import pycaret.classification
 import pycaret.regression
-from pandas import DataFrame
 from viktor.core import ViktorController
-from viktor.result import SetParamsResult
-from viktor.utils import memoize
-from viktor.views import DataGroup
-from viktor.views import DataItem
-from viktor.views import DataResult
-from viktor.views import DataView
 from viktor.views import PNGResult
 from viktor.views import PNGView
 from viktor.views import PlotlyResult
@@ -46,9 +39,6 @@ class AIController(ViktorController):
     def visualize_original(self, params, entity_id, **kwargs):
         csv = pd.read_csv(params.dataset.data)
         cells = [csv[col] for col in csv.columns]
-        # cells = []
-        # for col in csv.columns:
-        #     cells.append(csv[col])
 
         fig = go.Figure(data=go.Table(header=dict(values=list(csv.columns)), cells=dict(values=cells)))
 
@@ -60,9 +50,6 @@ class AIController(ViktorController):
         comparison = get_model(params.dataset.data, params.dataset.target, params.choice.toggle)
         comparison = pd.DataFrame(comparison)
         cells = [comparison[col] for col in comparison.columns]
-        # cells = []
-        # for col in comparison.columns:
-        #     cells.append(comparison[col])
 
         fig = go.Figure(data=go.Table(header=dict(values=list(comparison.columns)), cells=dict(values=cells)))
 
@@ -101,10 +88,7 @@ class AIController(ViktorController):
             best_model = pycaret.regression.load_model('current model')
             result = pycaret.regression.predict_model(best_model, data=csv)
         result = pd.DataFrame(result)
-        cells = [csv[col] for col in csv.columns]
-        # cells = []
-        # for col in result.columns:
-        #     cells.append(result[col])
+        cells = [result[col] for col in result.columns]
         fig = go.Figure(data=go.Table(header=dict(values=list(result.columns)), cells=dict(values=cells)))
 
         return PlotlyResult(fig.to_json())
@@ -134,11 +118,8 @@ class AIController(ViktorController):
             result = pycaret.regression.predict_model(best_model, data=new_data)
         result = pd.DataFrame(result)
         cells = [result[col] for col in result.columns]
-        # content_lis = []
-        # for col in result.columns:
-        #     content_lis.append(result[col])
 
-        fig = go.Figure(data=go.Table(header=dict(values=list(result.columns)), cells=dict(values=content_lis)))
+        fig = go.Figure(data=go.Table(header=dict(values=list(result.columns)), cells=dict(values=cells)))
 
         return PlotlyResult(fig.to_json())
 
