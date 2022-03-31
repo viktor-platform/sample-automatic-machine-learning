@@ -14,19 +14,18 @@ SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-from viktor.parametrization import HiddenField
 from viktor.parametrization import IsFalse
 from viktor.parametrization import Lookup
 from viktor.parametrization import OptionField
 from viktor.parametrization import Parametrization
 from viktor.parametrization import Section
-from viktor.parametrization import SetParamsButton
 from viktor.parametrization import Table
 from viktor.parametrization import TextField
 from viktor.parametrization import ToggleButton
 
 
 class AIParametrization(Parametrization):
+    """For displaying the correct fields to users"""
     choice = Section('Classification of regression')
     choice.toggle = ToggleButton('classification or regression')
 
@@ -64,4 +63,3 @@ class AIParametrization(Parametrization):
     new_data.inputs.sixth = TextField('param 6')
     new_data.inputs.seventh = TextField('param 7')
     new_data.inputs.eigth = TextField('param 8')
-

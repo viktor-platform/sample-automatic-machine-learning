@@ -20,10 +20,11 @@ import pycaret.classification
 import pycaret.regression
 
 
-def get_model(csv_path, target, toggle): # Function to run the model comparison and make all corresponding plots
+def get_model(csv_path, target, toggle):
+    """Function to run the model comparison and make all corresponding plots"""
     csv = pd.read_csv(csv_path)
 
-    if toggle == False:
+    if toggle is False:
         pycaret.classification.setup(csv, target=target, silent=True)
         best_model = pycaret.classification.compare_models()
         model_comparison = pycaret.classification.pull()
@@ -33,7 +34,7 @@ def get_model(csv_path, target, toggle): # Function to run the model comparison 
         best_model = pycaret.regression.compare_models()
         model_comparison = pycaret.regression.pull()
         pycaret.regression.save_model(best_model, 'current model')
-    if toggle == False:
+    if toggle is False:
         pycaret.classification.plot_model(best_model, plot='learning', save=True)
         pycaret.classification.plot_model(best_model, plot='auc', save=True)
         pycaret.classification.plot_model(best_model, plot='pr', save=True)
@@ -54,4 +55,3 @@ def get_model(csv_path, target, toggle): # Function to run the model comparison 
         pycaret.regression.plot_model(best_model, plot='feature_all', save=True)
 
     return model_comparison
-
