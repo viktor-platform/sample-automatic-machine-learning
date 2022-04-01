@@ -15,5 +15,5 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFT
 SOFTWARE.
 """
 
-from .AIFolder.controller import AIFolderController
-from .AI.controller import AIController
+from .ai_folder.controller import AIFolderController
+from .auto_ai.controller import AIController
