@@ -112,8 +112,8 @@ class AIController(ViktorController):
         for column in new_data.columns:
             try:
                 new_data[column] = new_data[column].astype(float)
-            except:
-                Exception
+            except Exception:
+                pass
 
         if params.choice.toggle is False:
             best_model = pycaret.classification.load_model('current model')
