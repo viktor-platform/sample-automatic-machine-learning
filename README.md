@@ -1,5 +1,7 @@
 ![](https://img.shields.io/badge/SDK-v12.10.0)
 
+![](AI_gif.gif)
+
 # AutoML app
 Sample app to show how easy it can be to distribute versatile machine learning solutions to people with no experience in it
 
