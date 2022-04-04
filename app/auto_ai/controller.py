@@ -15,7 +15,6 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFT
 SOFTWARE.
 """
 import pandas as pd
-import numpy as np
 import plotly.graph_objects as go
 import pycaret.classification
 import pycaret.regression
