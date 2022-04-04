@@ -15,6 +15,7 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFT
 SOFTWARE.
 """
 import pandas as pd
+import numpy as np
 import plotly.graph_objects as go
 import pycaret.classification
 import pycaret.regression
@@ -41,9 +42,7 @@ class AIController(ViktorController):
         """view to visualize the data in the read dataset"""
         csv = pd.read_csv(params.dataset.data)
         cells = [csv[col] for col in csv.columns]
-
         fig = go.Figure(data=go.Table(header=dict(values=list(csv.columns)), cells=dict(values=cells)))
-
         return PlotlyResult(fig.to_json())
 
 
@@ -93,6 +92,9 @@ class AIController(ViktorController):
             best_model = pycaret.regression.load_model('current model')
             result = pycaret.regression.predict_model(best_model, data=csv)
         result = pd.DataFrame(result)
+        print(result['Label'].dtypes != 'object')
+        if result['Label'].dtypes != 'object':
+            result['Label'] = result['Label'].round(decimals=4)
         cells = [result[col] for col in result.columns]
         fig = go.Figure(data=go.Table(header=dict(values=list(result.columns)), cells=dict(values=cells)))
 
@@ -112,7 +114,7 @@ class AIController(ViktorController):
         for column in new_data.columns:
             try:
                 new_data[column] = new_data[column].astype(float)
-            except Exception:
+            except ValueError:
                 pass
 
         if params.choice.toggle is False:
@@ -122,8 +124,9 @@ class AIController(ViktorController):
             best_model = pycaret.regression.load_model('current model')
             result = pycaret.regression.predict_model(best_model, data=new_data)
         result = pd.DataFrame(result)
+        if result['Label'].dtypes == 'float64':
+            result['Label'] = result['Label'].round(decimals=4)
         cells = [result[col] for col in result.columns]
-
         fig = go.Figure(data=go.Table(header=dict(values=list(result.columns)), cells=dict(values=cells)))
 
         return PlotlyResult(fig.to_json())
