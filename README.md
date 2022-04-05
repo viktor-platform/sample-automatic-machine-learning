@@ -41,7 +41,7 @@ model performance. The dataset is then labeled
 according to the model predictions so outcomes can
 be compared.
 
-![](manifest/labeled_data.PNG)
+![](manifest/pictures/labeled_data.PNG)
 
 And finally users can now see what outcomes prediction
 on their new data will yield.
