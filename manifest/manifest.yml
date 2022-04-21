@@ -1,0 +1,14 @@
+version: '1'
+entity_types:
+  AIFolder:
+    has_designer: false
+    show_properties: false
+  AI:
+    has_designer: true
+    show_properties: false
+entities:
+- entity_type: AIFolder
+  properties:
+    name: AI
+metadata:
+  background_image: 'ML_background.jpg'
