@@ -14,6 +14,8 @@ SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+import pandas as pd
+from viktor.parametrization import FileField
 from viktor.parametrization import IsFalse
 from viktor.parametrization import Lookup
 from viktor.parametrization import OptionField
@@ -24,34 +26,43 @@ from viktor.parametrization import TextField
 from viktor.parametrization import ToggleButton
 
 
+def get_possible_columns(params, **kwargs):
+    if params.dataset.data:
+        buffer = params.dataset.data.file.open_binary()
+        df = pd.read_csv(buffer)
+        buffer.close()
+        return df.columns.values.tolist()
+    return ['First upload a CSV file']
+
+
 class AIParametrization(Parametrization):
     """For displaying the correct fields to users"""
     choice = Section('Classification of regression')
     choice.toggle = ToggleButton('classification or regression')
 
     dataset = Section('Dataset')
-    dataset.data = TextField('input dataset')
-    dataset.target = TextField('target metric')
-    dataset.plot_classification = OptionField('plot options classification', options = ['learning curve',
-                                                                                        'area under curve',
-                                                                                        'precision recall',
-                                                                                        'confusion matrix',
-                                                                                        'prediction error',
-                                                                                        'validation curve',
-                                                                                        'dimension learning'],
-                                              default ='confusion matrix',
-                                              visible = IsFalse(Lookup('choice.toggle')))
+    dataset.data = FileField('input dataset', file_types=['.csv'])
+    dataset.target = OptionField('target metric', options=get_possible_columns)
+    dataset.plot_classification = OptionField('plot options classification', options=['learning curve',
+                                                                                      'area under curve',
+                                                                                      'precision recall',
+                                                                                      'confusion matrix',
+                                                                                      'prediction error',
+                                                                                      'validation curve',
+                                                                                      'dimension learning'],
+                                              default='confusion matrix',
+                                              visible=IsFalse(Lookup('choice.toggle')))
 
     dataset.plot_regression = OptionField('plot options regression',
-                                              options=['residuals',
-                                                       'prediction error',
-                                                       'cooks distance',
-                                                       'learning curve',
-                                                       'manifold',
-                                                       'feature importance (top 10)',
-                                                       'feature importance'],
+                                          options=['residuals',
+                                                   'prediction error',
+                                                   'cooks distance',
+                                                   'learning curve',
+                                                   'manifold',
+                                                   'feature importance (top 10)',
+                                                   'feature importance'],
                                           default='feature importance',
-                                          visible = Lookup('choice.toggle'))
+                                          visible=Lookup('choice.toggle'))
 
     new_data = Section('New data')
     new_data.inputs = Table('new entry')
