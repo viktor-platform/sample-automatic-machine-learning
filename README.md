@@ -1,4 +1,4 @@
-![](https://img.shields.io/badge/SDK-v12.10.0)
+![](https://img.shields.io/badge/SDK-v13.0.0)
 
 ![](AI_gif.gif)
 
