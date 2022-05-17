@@ -18,6 +18,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import pycaret.classification
 import pycaret.regression
+from viktor import UserException
 from viktor.core import ViktorController
 from viktor.views import PNGResult
 from viktor.views import PNGView
@@ -33,21 +34,23 @@ class AIController(ViktorController):
     label = 'AI'
     parametrization = AIParametrization
 
-    viktor_convert_entity_field = True
-
-
     @PlotlyView('Data', duration_guess=1)
     def visualize_original(self, params, entity_id, **kwargs):
-        """view to visualize the data in the read dataset"""
-        csv = pd.read_csv(params.dataset.data)
+        """View to visualize the data in the read dataset"""
+        csv = self.read_csv_dataframe(params)
+
         cells = [csv[col] for col in csv.columns]
         fig = go.Figure(data=go.Table(header=dict(values=list(csv.columns)), cells=dict(values=cells)))
         return PlotlyResult(fig.to_json())
 
-
     @PlotlyView('Models', duration_guess = 4)
     def calculate_models(self, params, entity_id, **kwargs):
-        """for visualizing the model scores"""
+        """For visualizing the model scores"""
+        if not params.dataset.data:
+            raise UserException("Please upload a CSV file in section: Dataset")
+        if not params.dataset.target:
+            raise UserException("Please set a target metric in section: Dataset")
+
         comparison = get_model(params.dataset.data, params.dataset.target, params.choice.toggle)
         comparison = pd.DataFrame(comparison)
         cells = [comparison[col] for col in comparison.columns]
@@ -58,7 +61,7 @@ class AIController(ViktorController):
 
     @PNGView('Analysis plot', duration_guess=1)
     def get_analyis_plot(self, params, entity_id, **kwargs):
-        """for visualizing some analysis plots"""
+        """For visualizing some analysis plots"""
         if params.choice.toggle is False:
             switcher = {'learning curve': 'Learning Curve.png',
                         'area under curve' : 'AUC.png',
@@ -82,8 +85,8 @@ class AIController(ViktorController):
 
     @PlotlyView('Labeled data', duration_guess=4)
     def label_data(self, params, entity_id, **kwargs):
-        """for analysing the values the machine learning gives the original data"""
-        csv = pd.read_csv(params.dataset.data)
+        """For analysing the values the machine learning gives the original data"""
+        csv = self.read_csv_dataframe(params)
         if params.choice.toggle is False:
             best_model = pycaret.classification.load_model('current model')
             result = pycaret.classification.predict_model(best_model, data=csv)
@@ -91,7 +94,7 @@ class AIController(ViktorController):
             best_model = pycaret.regression.load_model('current model')
             result = pycaret.regression.predict_model(best_model, data=csv)
         result = pd.DataFrame(result)
-        print(result['Label'].dtypes != 'object')
+        # print(result['Label'].dtypes != 'object')
         if result['Label'].dtypes != 'object':
             result['Label'] = result['Label'].round(decimals=4)
         cells = [result[col] for col in result.columns]
@@ -101,8 +104,8 @@ class AIController(ViktorController):
 
     @PlotlyView('New labels', duration_guess=4)
     def label_new(self, params, entity_id, **kwargs):
-        """for analysing the values the ML gives for new/custom data"""
-        csv = pd.read_csv(params.dataset.data)
+        """For analysing the values the ML gives for new/custom data"""
+        csv = self.read_csv_dataframe(params)
         new_data = pd.DataFrame(params.new_data.inputs)
 
         new_data.replace('', float('NaN'), inplace=True)
@@ -129,3 +132,14 @@ class AIController(ViktorController):
         fig = go.Figure(data=go.Table(header=dict(values=list(result.columns)), cells=dict(values=cells)))
 
         return PlotlyResult(fig.to_json())
+
+    def read_csv_dataframe(self, params):
+        """Read CSV file and makes a dataframe"""
+        if not params.dataset.data:
+            raise UserException("Please upload a CSV file in section: Dataset")
+
+        # Read CSV file
+        buffer = params.dataset.data.file.open_binary()
+        csv = pd.read_csv(buffer)
+        buffer.close()
+        return csv

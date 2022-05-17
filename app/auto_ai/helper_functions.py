@@ -18,11 +18,18 @@ SOFTWARE.
 import pandas as pd
 import pycaret.classification
 import pycaret.regression
+from viktor import UserException
 
 
-def get_model(csv_path, target, toggle):
+def get_model(csv_file, target, toggle):
     """Function to run the model comparison and make all corresponding plots"""
-    csv = pd.read_csv(csv_path)
+    if not csv_file:
+        raise UserException("Please upload a CSV file in section: Dataset")
+
+    # Read CSV file
+    buffer = csv_file.file.open_binary()
+    csv = pd.read_csv(buffer)
+    buffer.close()
 
     if toggle is False:
         pycaret.classification.setup(csv, target=target, silent=True)
