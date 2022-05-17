@@ -27,8 +27,8 @@ any user can make machine learning models.
 **Apply for a [demo account](https://www.viktor.ai/demo-environment) to get access to this and all other VIKTOR sample applications.** 
 
 ## AI for everyone
-In the app a user can give the path to their csv file, and which column they 
-would like to predict.
+In the app a user can give the path to their csv file, and which column they
+would like to predict. Examples for datasets can be found in [/app/auto_ai/data](/app/auto_ai/data)
 ![](manifest/pictures/Data.PNG)
 
 The back-end then handles everything and conveniently shows users

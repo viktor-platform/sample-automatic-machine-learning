@@ -27,6 +27,7 @@ from viktor.parametrization import ToggleButton
 
 
 def get_possible_columns(params, **kwargs):
+    """Retrieve all possible columns from the dataframe."""
     if params.dataset.data:
         buffer = params.dataset.data.file.open_binary()
         df = pd.read_csv(buffer)
